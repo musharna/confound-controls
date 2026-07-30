@@ -32,6 +32,19 @@ from .ablation import (
     ablation_control,
     assert_ablation_changed_input,
 )
+from .sequence import (
+    CONFIRMED,
+    NOT_CONFIRMED,
+    ControlSpan,
+    GroupedDelta,
+    ShuffleResult,
+    confirm_knockout,
+    dinucleotide_counts,
+    dinucleotide_shuffle,
+    grouped_delta_ci,
+    knockout_span,
+    sample_control_span,
+)
 from .battery import (
     ConfoundResult,
     battery_passes,
@@ -40,7 +53,7 @@ from .battery import (
     run_battery,
 )
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 __all__ = [
     "MatchResult", "match_negatives",
@@ -52,4 +65,8 @@ __all__ = [
     "ADDS", "HARMS", "NO_EFFECT", "UNDERPOWERED",
     "AblationResult", "ablation_control", "assert_ablation_changed_input",
     "STRUCTURE_DEPENDENT", "STRUCTURE_INDEPENDENT", "ABLATION_INCONCLUSIVE",
+    "ShuffleResult", "dinucleotide_shuffle", "dinucleotide_counts",
+    "knockout_span", "ControlSpan", "sample_control_span",
+    "GroupedDelta", "grouped_delta_ci", "confirm_knockout",
+    "CONFIRMED", "NOT_CONFIRMED",
 ]

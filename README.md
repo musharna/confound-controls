@@ -137,6 +137,54 @@ The matching and the statistics are unchanged. What changed:
   most resamples are skipped and the interval comes from a handful of
   replicates. It now raises rather than returning a confident-looking number.
 
+## Sequence ablation
+
+For sequence models, the ablation is a knockout: scramble a span, keep its
+dinucleotide composition, re-score, and ask whether the drop is real and larger
+than a length-matched control knockout elsewhere.
+
+```python
+from confound_controls import (
+    knockout_span, sample_control_span, grouped_delta_ci, confirm_knockout,
+)
+
+ko = knockout_span(seq, start, end, seed=1).require_changed()
+ctl = sample_control_span(len(seq), end - start, motif_spans, rng).require_disjoint()
+
+pooled  = grouped_delta_ci(real_scores, ko_scores, family_ids)
+control = grouped_delta_ci(real_scores, ctl_scores, family_ids)
+confirm_knockout(pooled, control)   # confirmed | not-confirmed
+```
+
+**`grouped_delta_ci` resamples whole groups, not rows.** Promoters from one
+paralog family are not independent observations; a row-level bootstrap treats
+96 correlated rows as 96 independent ones and reports an interval far narrower
+than the data supports. Measured on the bundled fixture: grouped 0.189 wide vs
+row-level 0.071.
+
+**Three silent fallbacks, all pointing the same way.** Each returned a
+plausible value on failure, and each failure makes the ablation weaker or
+absent — which reads as the model *surviving* it:
+
+- the dinucleotide shuffle ended `return seq` on failure, so an un-shuffleable
+  span came back **unchanged** — a knockout that knocked nothing out. The
+  comment called this "rare"; measured on a real 29-mer, knocking out `[8:20]`
+  leaves it unchanged for **2 of the first 8 seeds**.
+- the control-span sampler tried 50 times to avoid the real motif spans, then
+  returned an overlapping start regardless — a partial real knockout posing as
+  the negative control it is compared against.
+- the cluster bootstrap never checked it had enough distinct groups to resample.
+
+All three now report. `ShuffleResult.changed`, `ControlSpan.disjoint`, and a
+`min_groups` floor, each with a `require_*` that raises.
+
+The Altschul-Erikson shuffle itself is ported unchanged — **including its
+determinism fix**. Using `set(graph)` for the vertex list made `rng.choice`
+consume the PRNG in a different order per process (set iteration depends on the
+randomized hash of string keys), so the same `(seq, seed)` produced different
+shuffles run to run. A same-process test cannot catch that; the suite runs four
+subprocesses and compares.
+
 ## Not extracted
 
 `aim3_confound_table.py` builds the confound table itself from FASTA, DE
