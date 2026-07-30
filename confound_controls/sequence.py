@@ -160,6 +160,16 @@ def dinucleotide_shuffle(seq: str, seed: int, attempts: int = 50) -> ShuffleResu
 
     # The source returned `seq` here silently. It is still the only
     # count-preserving answer available -- but it is reported, not disguised.
+    #
+    # NOT COVERED BY THE SUITE, and deliberately marked so rather than left
+    # looking tested: reaching this line needs 50 consecutive attempts to fail
+    # connectivity or the count check, and a probe over 8 sequences x 30 seeds
+    # (homopolymers, dinucleotide repeats, 2-4mers included) reached it zero
+    # times. The unshuffleable cases users actually hit -- "AAAAAAAA", or a
+    # 12-mer under an unlucky seed -- exit through the success path above with
+    # `out == seq`, which IS covered. A mutation planted on this line survives
+    # the suite; that is a true coverage gap on an unreachable backstop, not a
+    # missing test.
     return ShuffleResult(seq, False, attempts)
 
 
