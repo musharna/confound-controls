@@ -1,0 +1,3 @@
+# confound-controls
+
+Scaffolding commit.
