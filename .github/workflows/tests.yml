@@ -1,0 +1,60 @@
+name: tests
+
+# The anti-rot mechanism. Every bug this package was extracted to fix was a
+# documented thing nobody actually ran; without CI this suite is in exactly
+# that position, running only when someone happens to run it locally.
+#
+# It installs from pyproject and runs the suite the README tells a user to run.
+# Do not replace `pip install -e ".[test]"` with a bare `pip install pytest
+# numpy ...` -- resolving the dependencies is part of what is being tested, and
+# a hand-listed set can succeed while the declared one does not.
+#
+# Triggers: push on master + pull_request. A PR from a branch in this repo
+# would otherwise fire BOTH events for one change and bill twice; restricting
+# push to master is the fix already applied in rnaseq-template (032b5e6).
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A new push to the same branch cancels the previous run rather than paying for
+# a result nobody will read.
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The floor declared in pyproject (requires-python = ">=3.10") and the
+        # current release. Testing only one would let the declared floor rot.
+        python-version: ["3.10", "3.13"]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install from the declared dependencies
+        run: python -m pip install --upgrade pip && pip install -e ".[test]"
+
+      - name: Run the suite
+        # Exactly the command the README gives. If that stops working from a
+        # fresh clone, saying so is the whole point of this workflow.
+        run: pytest -q
+
+      - name: The package imports and reports its version
+        # Cheap real-execution check on the installed artifact rather than the
+        # source tree: a broken __init__ or a missing module in the wheel does
+        # not necessarily fail the tests, which import from the checkout.
+        run: |
+          cd "$(mktemp -d)"
+          python -c "import confound_controls as cc; print(cc.__version__); assert cc.__all__"
