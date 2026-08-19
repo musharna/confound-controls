@@ -1,6 +1,6 @@
 """Run a confound battery: for each confound, match on it and re-score.
 
-Extracted from arf_promoter_analysis/scripts/aim3_matched_negatives.py, whose
+Extracted from an internal matched-negatives script, whose
 main() hardcoded the study in four separate places:
 
     CONFOUNDS = os.path.join(REPO, "results/aim3_control/confounds.tsv")
