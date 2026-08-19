@@ -1,6 +1,6 @@
 """Sequence-level ablation: knock out a span, keep composition, say whether it worked.
 
-Extracted from arf_promoter_analysis (byte-identical in phelipanche-fm):
+Extracted from an internal project (byte-identical in a second one):
 `aim3_shuffle_promoters.dinucl_shuffle`, `ig_knockout_ism.knockout_instance` /
 `delta_ci`, and `cg_ism._nonoverlap_start`. `cg_ism`'s own docstring says it
 "reuses ig_knockout_ism (knockout_instance, delta_ci)", so the reuse was

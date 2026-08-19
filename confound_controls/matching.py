@@ -1,7 +1,7 @@
 """Match negatives to positives on confounds, and say so when you cannot.
 
-Extracted from arf_promoter_analysis/scripts/aim3_matched_negatives.py (also
-present byte-identical in phelipanche-fm -- the code was copied between two
+Extracted from an internal matched-negatives script (also present
+byte-identical in a second internal project -- the code was copied between two
 independent repos, which is what marked it as worth extracting).
 
 The matching itself is unchanged. What changed is that it now reports whether
