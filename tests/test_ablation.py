@@ -105,3 +105,30 @@ def test_degenerate_inputs_raise():
         ablation_control(y, real[:-1], ablated)
     with pytest.raises(ValueError, match="both classes"):
         ablation_control(np.ones(10), np.arange(10.0), np.arange(10.0))
+
+
+def test_inert_ablation_is_caught_even_when_the_inputs_contain_nan():
+    # np.allclose defaults to equal_nan=False, so NaN != NaN and two IDENTICAL
+    # arrays slipped past the guard whose entire job is to catch identical input.
+    import numpy as np
+    import pytest
+
+    from confound_controls import assert_ablation_changed_input
+
+    x = np.array([np.nan, 1.0, 2.0])
+    with pytest.raises(ValueError, match="identical"):
+        assert_ablation_changed_input(x, x.copy())
+
+
+def test_ablated_scores_that_separate_INVERSELY_still_count_as_separating():
+    # A perfectly reversed ranking (auroc 0) separates the classes exactly as
+    # well as auroc 1; only the sign differs. The source asked `a_lo > 0.5`, so
+    # an ablation that changed nothing was reported as "partial" collapse.
+    import numpy as np
+
+    from confound_controls import STRUCTURE_INDEPENDENT, ablation_control
+
+    y = np.r_[np.ones(100, int), np.zeros(100, int)]
+    inverted = 1 - y                      # auroc 0.0, perfectly separating
+    res = ablation_control(y, inverted, inverted, n=200, seed=0)
+    assert res.verdict == STRUCTURE_INDEPENDENT, res

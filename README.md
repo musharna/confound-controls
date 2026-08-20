@@ -53,10 +53,15 @@ Pass `require_selective_match=False` if you mean it; the result then carries
 | `confound-driven` | the interval straddles chance — matching removed the signal                         |
 | `partial`         | signal is real but diminished                                                       |
 | `inconclusive`    | the interval is too wide to support any of the above (opt in via `max_ci_width`)    |
+| `inverted`        | the interval clears chance from BELOW — the control reversed the ranking            |
 
 `inconclusive` has no counterpart in the source this came from, which folded
 those cases into `confound-driven` — reporting an absent measurement as a
 finding.
+
+`inverted` likewise had no counterpart: an interval entirely below chance
+*excludes* chance, so it fell through to `partial` — reporting a control that
+reliably reversed the ranking as a diminished-but-real signal.
 
 ## Two more controls
 

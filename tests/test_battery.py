@@ -215,3 +215,27 @@ def test_an_equal_sized_pool_is_refused_as_a_vacuous_control():
         big_df["label"], [big_probs[i] for i in big_df["id"]]).point
     good = evaluate_confound(big_df, big_probs, ["gc"], big_anchor, name="gc")
     assert good.match_selective and good.verdict == DRIVEN
+
+
+def test_evaluate_confound_rejects_duplicate_ids():
+    # Both `prob_map[id]` and the matched-id set assume an id names ONE row.
+    # With a duplicate, `isin(eval_ids)` pulls the twin in too, so a 1:1 design
+    # silently evaluates two negatives for one matched positive.
+    df, probs = _frame()
+    neg = df.index[df["label"] == 0]
+    df.loc[neg[1], "id"] = df.loc[neg[0], "id"]
+    anchor = bootstrap_auroc(df["label"], [probs[i] for i in df["id"]]).point
+    with pytest.raises(ValueError, match="duplicate"):
+        evaluate_confound(df, probs, ["gc"], anchor, name="gc")
+
+
+def test_verdict_flags_a_reliably_inverted_interval():
+    # An interval entirely BELOW chance excludes chance, so it fell through to
+    # PARTIAL -- documented as "signal is real but diminished". A control that
+    # reliably reversed the ranking is not diminished signal, it is an anomaly.
+    from confound_controls.metrics import INVERTED, PARTIAL, AurocCI
+    from confound_controls.metrics import verdict as _verdict
+
+    assert _verdict(AurocCI(point=0.42, lo=0.36, hi=0.48), anchor=0.9) == INVERTED
+    # positive control: an interval ABOVE chance with the same width is PARTIAL
+    assert _verdict(AurocCI(point=0.58, lo=0.52, hi=0.64), anchor=0.9) == PARTIAL
