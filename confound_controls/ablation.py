@@ -1,7 +1,7 @@
 """Score an ablated input with the same model and see what survives.
 
-Extracted from arf_promoter_analysis/scripts/aim3_grammar_shuffle.py
-(byte-identical in phelipanche-fm). There the ablation was a
+Extracted from an internal grammar-shuffle script
+(byte-identical in a second internal project). There the ablation was a
 dinucleotide-preserving shuffle of promoter sequences, applied zero-shot to a
 frozen probe: if AUROC collapses toward chance, the model was reading order
 rather than composition.

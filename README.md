@@ -114,9 +114,9 @@ returns the original answer, which reads as the hypothesis surviving.
 
 ## What changed from the source
 
-Extracted from `arf_promoter_analysis/scripts/aim3_matched_negatives.py`,
-present byte-identically in `phelipanche-fm`. The code had been copied between
-two independent repositories, which is what marked it as worth extracting:
+Extracted from an internal matched-negatives script, present byte-identically
+in a second internal project. The code had been copied between two independent
+repositories, which is what marked it as worth extracting:
 duplication across repos is revealed reuse demand rather than a proxy for it.
 
 The matching and the statistics are unchanged. What changed:
@@ -199,7 +199,7 @@ does — so it stays where it is.
 
 ## The source repos are untouched
 
-Both `arf_promoter_analysis` and `phelipanche-fm` are active. This is
+Both source projects are active. This is
 extract-and-leave-source-alone: nothing was refactored there, and neither repo
 imports this package.
 
