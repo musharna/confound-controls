@@ -1,6 +1,6 @@
 """AUROC with a bootstrap interval, and the anchored verdict built on it.
 
-Extracted from arf_promoter_analysis/scripts/aim3_probe_common.py (bootstrap)
+Extracted from an internal probe-common module (bootstrap)
 and aim3_matched_negatives.py (recovery/verdict). The maths is unchanged; the
 study constants are gone.
 

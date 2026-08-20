@@ -1,7 +1,7 @@
 """Controls for "did my classifier learn the signal, or a confound?"
 
 Extracted from the aim3 control battery shared byte-identically between
-arf_promoter_analysis and phelipanche-fm.
+two internal research projects.
 """
 
 from .matching import MatchResult, match_negatives
@@ -54,7 +54,7 @@ from .battery import (
     run_battery,
 )
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 __all__ = [
     "MatchResult", "match_negatives",

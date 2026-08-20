@@ -1,7 +1,7 @@
 """Does the new feature add anything beyond the confounds?
 
-Extracted from arf_promoter_analysis/scripts/aim3_incremental_validity.py
-(byte-identical in phelipanche-fm). Fit a confound-only model and a
+Extracted from an internal incremental-validity script
+(byte-identical in a second internal project). Fit a confound-only model and a
 confound+feature model, evaluate both on the same held-out rows, and put a
 paired bootstrap interval on the AUROC difference.
 
