@@ -8,6 +8,7 @@ from .matching import MatchResult, match_negatives
 from .metrics import (
     DRIVEN,
     INCONCLUSIVE,
+    INVERTED,
     PARTIAL,
     ROBUST,
     AurocCI,
@@ -58,7 +59,7 @@ __version__ = "0.3.0"
 __all__ = [
     "MatchResult", "match_negatives",
     "AurocCI", "bootstrap_auroc", "recovery", "verdict",
-    "ROBUST", "DRIVEN", "PARTIAL", "INCONCLUSIVE",
+    "ROBUST", "DRIVEN", "PARTIAL", "INCONCLUSIVE", "INVERTED",
     "ConfoundResult", "evaluate_confound", "run_battery",
     "battery_passes", "format_battery",
     "DeltaResult", "paired_delta_auroc", "incremental_validity",
