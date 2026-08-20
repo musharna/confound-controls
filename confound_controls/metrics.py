@@ -29,6 +29,7 @@ ROBUST = "confound-robust"
 DRIVEN = "confound-driven"
 PARTIAL = "partial"
 INCONCLUSIVE = "inconclusive"
+INVERTED = "inverted"  # the interval sits entirely BELOW chance
 
 
 @dataclass(frozen=True)
@@ -105,6 +106,7 @@ def verdict(
     - ROBUST: enough of the anchor's signal survived AND the interval clears chance
     - DRIVEN: the interval straddles chance -- the control removed the signal
     - PARTIAL: signal is real but diminished
+    - INVERTED: the interval clears chance from BELOW -- the ranking reversed
     - INCONCLUSIVE: the interval is too wide to support any of the above
 
     `max_ci_width` is opt-in because the source had no such concept, and adding
@@ -116,4 +118,9 @@ def verdict(
         return ROBUST
     if not ci.excludes_chance:
         return DRIVEN
+    if ci.hi < 0.5:
+        # Excludes chance, but from below: the control did not diminish the
+        # signal, it REVERSED it. Calling that "partial" ("signal is real but
+        # diminished") reports a pathology as a weak positive.
+        return INVERTED
     return PARTIAL

@@ -207,6 +207,22 @@ class ControlSpan:
         return self
 
 
+def _draw_start(rng, lo: int, hi: int) -> int:
+    """Draw an integer in [lo, hi] INCLUSIVE, whichever PRNG flavour was passed.
+
+    The three PRNGs this package already uses disagree about the upper bound:
+    numpy's RandomState.randint and Generator.integers EXCLUDE it, stdlib
+    random.Random.randint INCLUDES it -- and Generator has no `.randint` at all.
+    `rng.randint(0, hi)` therefore meant a different range for different callers
+    and, under numpy, could never draw the last legal start.
+    """
+    if hasattr(rng, "integers"):            # numpy Generator
+        return int(rng.integers(lo, hi + 1))
+    if hasattr(rng, "random_sample"):       # numpy RandomState
+        return int(rng.randint(lo, hi + 1))
+    return int(rng.randint(lo, hi))         # stdlib random.Random
+
+
 def sample_control_span(
     length: int, total: int, spans, rng, attempts: int = 50
 ) -> ControlSpan:
@@ -218,13 +234,27 @@ def sample_control_span(
     """
     if total <= 0:
         raise ValueError(f"control span length must be positive, got {total}")
-    hi = max(1, length - total)
+    if total > length:
+        raise ValueError(
+            f"control span length {total} is longer than the sequence ({length}), "
+            f"so no placement fits; the source clamped the range and returned a "
+            f"span running off the end, flagged as if it were valid."
+        )
     spans = list(spans)
+    max_start = length - total          # INCLUSIVE: a span may sit flush at the end
+
+    def _clear(st: int) -> bool:
+        return all(st + total <= s or st >= e for s, e in spans)
+
     for _ in range(attempts):
-        st = int(rng.randint(0, hi))
-        if all(st + total <= s or st >= e for s, e in spans):
+        st = _draw_start(rng, 0, max_start)
+        if _clear(st):
             return ControlSpan(st, total, True)
-    return ControlSpan(int(rng.randint(0, hi)), total, False)
+    # Report what the fallback draw ACTUALLY is. The source hardcoded False, so a
+    # span that happened to land clear was reported as overlapping, and callers
+    # discarded a usable control (or trusted require_disjoint's error over the data).
+    st = _draw_start(rng, 0, max_start)
+    return ControlSpan(st, total, _clear(st))
 
 
 @dataclass(frozen=True)

@@ -74,6 +74,16 @@ def evaluate_confound(
             f"{len(neg)} negative rows"
         )
 
+    dupes = df[id_column][df[id_column].duplicated()].unique()
+    if len(dupes):
+        raise ValueError(
+            f"{name}: {len(dupes)} duplicate id(s) in column '{id_column}' "
+            f"(e.g. {list(dupes[:3])}). An id must name exactly one row: "
+            f"probabilities are looked up by id and the evaluated set is rebuilt "
+            f"by id, so a duplicate silently drags its twin into the evaluation "
+            f"and the reported 1:1 design is not 1:1."
+        )
+
     match = match_negatives(
         pos[list(columns)].to_numpy(),
         neg[id_column].tolist(),

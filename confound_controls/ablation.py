@@ -72,7 +72,9 @@ def assert_ablation_changed_input(real, ablated, *, name: str = "ablation") -> N
             f"these are meant to be the same inputs with structure destroyed"
         )
     if real.dtype.kind in "fc" or ablated.dtype.kind in "fc":
-        identical = np.allclose(real, ablated)
+        # equal_nan=True: NaN != NaN by default, so two IDENTICAL arrays
+        # containing NaN slipped past the guard built to catch identical input.
+        identical = np.allclose(real, ablated, equal_nan=True)
     else:
         identical = np.array_equal(real, ablated)
     if identical:
@@ -132,13 +134,18 @@ def ablation_control(
     d_lo, d_hi = np.percentile(deltas, [2.5, 97.5])
     a_lo, a_hi = np.percentile(ablated_aucs, [2.5, 97.5])
     delta_excludes_zero = d_lo > 0 or d_hi < 0
-    ablated_includes_chance = a_lo <= 0.5 <= a_hi
+    # Separation is DISTANCE from chance, not height above it: a perfectly
+    # reversed ranking (auroc 0) discriminates exactly as well as auroc 1. The
+    # source asked `a_lo > 0.5`, so an ablation that changed nothing at all read
+    # as a partial collapse whenever the scores ran the other way.
+    ablated_excludes_chance = a_lo > 0.5 or a_hi < 0.5
+    ablated_includes_chance = not ablated_excludes_chance
 
     if max_ci_width is not None and (d_hi - d_lo) > max_ci_width:
         verdict = INCONCLUSIVE
     elif ablated_includes_chance and delta_excludes_zero:
         verdict = STRUCTURE_DEPENDENT
-    elif a_lo > 0.5 and not delta_excludes_zero:
+    elif ablated_excludes_chance and not delta_excludes_zero:
         # Ablated scores still separate, and the drop is not distinguishable
         # from zero: the structure was never what the model was using.
         verdict = STRUCTURE_INDEPENDENT

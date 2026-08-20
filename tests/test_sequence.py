@@ -204,3 +204,47 @@ def test_the_silent_fallback_case_is_not_rare_on_real_spans():
     for s in unchanged:
         with pytest.raises(ValueError, match="returned the input unchanged"):
             knockout_span(SEQ, 8, 20, seed=s).require_changed()
+
+
+def test_control_span_rejects_a_span_longer_than_the_sequence():
+    # A control longer than the sequence cannot be placed at all. The source
+    # clamped `hi` to 1 and returned start=0, so the span ran off the end while
+    # being flagged disjoint -- the caller then scrambles fewer bases than it
+    # asked for, and the "length-matched" control is not length-matched.
+    with pytest.raises(ValueError, match="longer than the sequence"):
+        sample_control_span(5, 6, [], np.random.RandomState(0))
+
+
+def test_control_span_can_be_placed_flush_against_the_end():
+    # length 10 with a 5-long control and (0,5) taken leaves exactly one legal
+    # start: 5. numpy's randint excludes its upper bound, so the source could
+    # only ever draw 0..4 and reported "cannot place" for a placeable span.
+    span = sample_control_span(
+        length=10, total=5, spans=[(0, 5)], rng=np.random.RandomState(0)
+    )
+    assert span.disjoint
+    assert span.start == 5
+    assert span.end == 10
+
+
+def test_control_span_never_mislabels_the_fallback_draw():
+    # The fallback returned disjoint=False without checking the draw it had just
+    # made, so a span that WAS clear got reported as overlapping.
+    spans = [(0, 4)]
+    for seed in range(60):
+        s = sample_control_span(
+            length=10, total=3, spans=spans, rng=np.random.RandomState(seed), attempts=1
+        )
+        really = all(s.start + s.length <= a or s.start >= b for a, b in spans)
+        assert s.disjoint == really, f"seed {seed}: flagged {s.disjoint}, actually {really}"
+        assert s.end <= 10
+
+
+def test_control_span_accepts_the_generator_this_package_uses_elsewhere():
+    # np.random.default_rng is used in these very tests, but Generator has no
+    # .randint at all -- passing one raised AttributeError.
+    span = sample_control_span(
+        length=1000, total=10, spans=[(100, 150)], rng=np.random.default_rng(0)
+    )
+    assert span.disjoint
+    assert span.end <= 100 or span.start >= 150
