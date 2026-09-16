@@ -9,10 +9,11 @@ matching, it is not that confound. If it collapses to chance, it was.
 ```python
 from confound_controls import run_battery, format_battery, bootstrap_auroc
 
-anchor = bootstrap_auroc(df["label"], probs).point   # uncontrolled baseline
+anchor = bootstrap_auroc(df["label"], probs).point  # uncontrolled baseline
 
 results = run_battery(
-    df, prob_map,
+    df,
+    prob_map,
     spec={"gc": ["gc"], "expression": ["log_expr"], "joint": ["gc", "log_expr"]},
     anchor=anchor,
 )
@@ -60,12 +61,12 @@ those cases into `confound-driven` — reporting an absent measurement as a
 finding.
 
 `inverted` likewise had no counterpart: an interval entirely below chance
-*excludes* chance, so it fell through to `partial` — reporting a control that
+_excludes_ chance, so it fell through to `partial` — reporting a control that
 reliably reversed the ranking as a diminished-but-real signal.
 
 ## Two more controls
 
-**Incremental validity** — does the new feature add anything *beyond* the
+**Incremental validity** — does the new feature add anything _beyond_ the
 confounds? Fit confound-only and confound+feature models, evaluate both on the
 same held-out rows, and put a **paired** bootstrap interval on the AUROC
 difference.
@@ -77,8 +78,9 @@ two separately-reported AUROCs by eye is exactly the error this prevents.
 
 ```python
 from confound_controls import incremental_validity
+
 res = incremental_validity(conf_train, conf_test, feat_train, feat_test, y_train, y_test)
-res.verdict   # adds-signal | harms | no-added-signal | underpowered
+res.verdict  # adds-signal | harms | no-added-signal | underpowered
 ```
 
 `feat_train` must be out-of-fold. Fitting the feature on the rows the confound
@@ -87,7 +89,7 @@ manufactures the very lift the control is testing for.
 
 The source's verdict was two-valued (`"FM-adds-signal" if lo > 0 else
 "no-added-signal"`), so an interval straddling zero, an interval too wide to
-say anything, and an interval lying entirely *below* zero all reported the
+say anything, and an interval lying entirely _below_ zero all reported the
 same. The last of those is an augmented model that is reliably **worse** — a
 finding, not an absence of one.
 
@@ -96,9 +98,10 @@ score with the same model, and see what survives.
 
 ```python
 from confound_controls import assert_ablation_changed_input, ablation_control
-assert_ablation_changed_input(real_inputs, ablated_inputs)   # do this first
+
+assert_ablation_changed_input(real_inputs, ablated_inputs)  # do this first
 res = ablation_control(y, p_real, p_ablated)
-res.verdict   # structure-dependent | structure-independent | partial | inconclusive
+res.verdict  # structure-dependent | structure-independent | partial | inconclusive
 ```
 
 That first call is not optional politeness. **A broken ablation leaves the
@@ -150,15 +153,18 @@ than a length-matched control knockout elsewhere.
 
 ```python
 from confound_controls import (
-    knockout_span, sample_control_span, grouped_delta_ci, confirm_knockout,
+    knockout_span,
+    sample_control_span,
+    grouped_delta_ci,
+    confirm_knockout,
 )
 
 ko = knockout_span(seq, start, end, seed=1).require_changed()
 ctl = sample_control_span(len(seq), end - start, motif_spans, rng).require_disjoint()
 
-pooled  = grouped_delta_ci(real_scores, ko_scores, family_ids)
+pooled = grouped_delta_ci(real_scores, ko_scores, family_ids)
 control = grouped_delta_ci(real_scores, ctl_scores, family_ids)
-confirm_knockout(pooled, control)   # confirmed | not-confirmed
+confirm_knockout(pooled, control)  # confirmed | not-confirmed
 ```
 
 **`grouped_delta_ci` resamples whole groups, not rows.** Promoters from one
@@ -169,7 +175,7 @@ row-level 0.071.
 
 **Three silent fallbacks, all pointing the same way.** Each returned a
 plausible value on failure, and each failure makes the ablation weaker or
-absent — which reads as the model *surviving* it:
+absent — which reads as the model _surviving_ it:
 
 - the dinucleotide shuffle ended `return seq` on failure, so an un-shuffleable
   span came back **unchanged** — a knockout that knocked nothing out. The
@@ -206,7 +212,13 @@ imports this package.
 ## Install
 
 ```bash
-pip install -e ".[test]"
+pip install confound-controls
+```
+
+From a checkout, for development:
+
+```bash
+pip install -e ".[dev]"
 pytest -q
 ```
 

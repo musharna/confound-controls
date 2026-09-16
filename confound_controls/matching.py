@@ -63,7 +63,7 @@ class MatchResult:
         """
         return self.n_matched < self.n_pool
 
-    def require_complete(self) -> "MatchResult":
+    def require_complete(self) -> MatchResult:
         if not self.complete:
             raise ValueError(
                 f"matched only {self.n_matched} of {self.n_positives} positives; "
@@ -73,7 +73,7 @@ class MatchResult:
             )
         return self
 
-    def require_selective(self) -> "MatchResult":
+    def require_selective(self) -> MatchResult:
         if not self.selective:
             raise ValueError(
                 f"matching consumed the entire negative pool "
@@ -115,8 +115,7 @@ def match_negatives(pos_vecs, neg_ids, neg_vecs) -> MatchResult:
         )
     if len(neg_ids) != neg_vecs.shape[0]:
         raise ValueError(
-            f"neg_ids has {len(neg_ids)} entries but neg_vecs has "
-            f"{neg_vecs.shape[0]} rows"
+            f"neg_ids has {len(neg_ids)} entries but neg_vecs has {neg_vecs.shape[0]} rows"
         )
     if not len(neg_ids):
         return MatchResult([], list(range(len(pos_vecs))), len(pos_vecs), 0)

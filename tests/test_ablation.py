@@ -129,6 +129,6 @@ def test_ablated_scores_that_separate_INVERSELY_still_count_as_separating():
     from confound_controls import STRUCTURE_INDEPENDENT, ablation_control
 
     y = np.r_[np.ones(100, int), np.zeros(100, int)]
-    inverted = 1 - y                      # auroc 0.0, perfectly separating
+    inverted = 1 - y  # auroc 0.0, perfectly separating
     res = ablation_control(y, inverted, inverted, n=200, seed=0)
     assert res.verdict == STRUCTURE_INDEPENDENT, res
