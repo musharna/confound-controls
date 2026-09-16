@@ -5,14 +5,38 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "confound-controls"
 version = "0.3.1"
-description = "Confound-matched controls for classifier claims: 1:1 matching, bootstrap AUROC, anchored verdicts."
+description = "Confound-matched controls for classifier claims: 1:1 matching, bootstrap AUROC, anchored verdicts, and a refusal when the control is vacuous."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "GPL-3.0-or-later" }
+authors = [{ name = "Jaret Arnold" }]
+keywords = ["confounding", "matching", "auroc", "bootstrap", "classifier-evaluation", "research-integrity"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
 dependencies = ["numpy>=1.24", "pandas>=2.0", "scipy>=1.10", "scikit-learn>=1.3"]
+
+[project.urls]
+Homepage = "https://github.com/musharna/confound-controls"
+Repository = "https://github.com/musharna/confound-controls"
+Changelog = "https://github.com/musharna/confound-controls/blob/master/CHANGELOG.md"
+Issues = "https://github.com/musharna/confound-controls/issues"
 
 [project.optional-dependencies]
 test = ["pytest>=7"]
+dev = ["pytest>=7", "ruff>=0.6"]
 
 [tool.setuptools]
 packages = ["confound_controls"]
+
+[tool.ruff]
+line-length = 100

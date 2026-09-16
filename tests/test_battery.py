@@ -46,11 +46,13 @@ def _frame(n_pos=150, n_neg=600, seed=0, confound_drives=False, twin_frac=0.35):
     """
     rng = np.random.default_rng(seed)
     n_twin = int(round(n_neg * twin_frac))
-    gc = np.concatenate([
-        rng.normal(0.55, 0.05, n_pos),               # positives
-        rng.normal(0.55, 0.05, n_twin),              # gc-matched negatives
-        rng.normal(0.40, 0.04, n_neg - n_twin),      # bulk low-gc negatives
-    ])
+    gc = np.concatenate(
+        [
+            rng.normal(0.55, 0.05, n_pos),  # positives
+            rng.normal(0.55, 0.05, n_twin),  # gc-matched negatives
+            rng.normal(0.40, 0.04, n_neg - n_twin),  # bulk low-gc negatives
+        ]
+    )
     label = np.r_[np.ones(n_pos, int), np.zeros(n_neg, int)]
     n = n_pos + n_neg
     other = rng.normal(0, 1, n)
@@ -136,8 +138,7 @@ def test_incomplete_match_raises_by_default_and_is_reported_when_allowed():
     with pytest.raises(ValueError, match="matched only"):
         evaluate_confound(small, probs, ["other"], anchor)
     res = evaluate_confound(
-        small, probs, ["other"], anchor,
-        require_complete_match=False, require_selective_match=False
+        small, probs, ["other"], anchor, require_complete_match=False, require_selective_match=False
     )
     assert not res.match_complete
     assert res.n_matched_negatives == 5
@@ -148,8 +149,13 @@ def test_format_battery_flags_an_incomplete_match_in_its_text():
     small = pd.concat([df[df["label"] == 1], df[df["label"] == 0].head(5)])
     results = {
         "other": evaluate_confound(
-            small, probs, ["other"], 0.9, name="other",
-            require_complete_match=False, require_selective_match=False
+            small,
+            probs,
+            ["other"],
+            0.9,
+            name="other",
+            require_complete_match=False,
+            require_selective_match=False,
         )
     }
     assert "INCOMPLETE MATCH" in format_battery(results, 0.9)
@@ -168,9 +174,7 @@ def test_anchor_at_or_below_chance_is_refused():
 def test_bootstrap_refuses_a_single_class_and_reports_a_real_interval():
     with pytest.raises(ValueError, match="both classes"):
         bootstrap_auroc(np.ones(10), np.arange(10.0))
-    ci = bootstrap_auroc(
-        np.r_[np.ones(50), np.zeros(50)], np.r_[np.ones(50), np.zeros(50)]
-    )
+    ci = bootstrap_auroc(np.r_[np.ones(50), np.zeros(50)], np.r_[np.ones(50), np.zeros(50)])
     assert ci.point == 1.0 and ci.lo <= ci.hi and ci.excludes_chance
 
 
@@ -201,18 +205,17 @@ def test_an_equal_sized_pool_is_refused_as_a_vacuous_control():
 
     # Opting out reproduces the original silent behaviour, and it is WRONG in
     # exactly the way described: a pure-GC signal survives GC matching.
-    res = evaluate_confound(df, probs, ["gc"], anchor, name="gc",
-                            require_selective_match=False)
+    res = evaluate_confound(df, probs, ["gc"], anchor, name="gc", require_selective_match=False)
     assert not res.match_selective
     assert res.verdict == ROBUST, (
-        "if this is no longer ROBUST the vacuity demonstration has changed")
+        "if this is no longer ROBUST the vacuity demonstration has changed"
+    )
     assert "VACUOUS CONTROL" in format_battery({"gc": res}, anchor)
 
     # Positive control: the SAME confound with a pool that permits selection
     # reaches the opposite, correct verdict.
     big_df, big_probs = _frame(n_pos=150, n_neg=600, confound_drives=True)
-    big_anchor = bootstrap_auroc(
-        big_df["label"], [big_probs[i] for i in big_df["id"]]).point
+    big_anchor = bootstrap_auroc(big_df["label"], [big_probs[i] for i in big_df["id"]]).point
     good = evaluate_confound(big_df, big_probs, ["gc"], big_anchor, name="gc")
     assert good.match_selective and good.verdict == DRIVEN
 

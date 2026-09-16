@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use confound-controls in your work, please cite it as below."
+title: confound-controls
+abstract: >-
+  Confound-matched controls for classifier claims: for each named confound,
+  restrict the negatives to a subset matched 1:1 to the positives on that
+  confound and recompute AUROC with bootstrap intervals, anchored to the
+  uncontrolled baseline; refuses to issue a verdict when the matched control
+  is vacuous.
+type: software
+authors:
+  - family-names: Arnold
+    given-names: Jaret
+repository-code: "https://github.com/musharna/confound-controls"
+url: "https://pypi.org/project/confound-controls/"
+license: GPL-3.0-or-later
+version: 0.3.1
+date-released: "2026-09-02"
+keywords:
+  - confounding
+  - matching
+  - AUROC
+  - classifier-evaluation

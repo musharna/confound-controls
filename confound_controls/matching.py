@@ -115,8 +115,7 @@ def match_negatives(pos_vecs, neg_ids, neg_vecs) -> MatchResult:
         )
     if len(neg_ids) != neg_vecs.shape[0]:
         raise ValueError(
-            f"neg_ids has {len(neg_ids)} entries but neg_vecs has "
-            f"{neg_vecs.shape[0]} rows"
+            f"neg_ids has {len(neg_ids)} entries but neg_vecs has {neg_vecs.shape[0]} rows"
         )
     if not len(neg_ids):
         return MatchResult([], list(range(len(pos_vecs))), len(pos_vecs), 0)

@@ -176,13 +176,9 @@ def dinucleotide_shuffle(seq: str, seed: int, attempts: int = 50) -> ShuffleResu
 def knockout_span(seq: str, start: int, end: int, seed: int) -> ShuffleResult:
     """Scramble `seq[start:end]` in place; flanks stay byte-identical."""
     if not 0 <= start < end <= len(seq):
-        raise ValueError(
-            f"span [{start}, {end}) is not inside a sequence of length {len(seq)}"
-        )
+        raise ValueError(f"span [{start}, {end}) is not inside a sequence of length {len(seq)}")
     inner = dinucleotide_shuffle(seq[start:end], seed)
-    return ShuffleResult(
-        seq[:start] + inner.sequence + seq[end:], inner.changed, inner.attempts
-    )
+    return ShuffleResult(seq[:start] + inner.sequence + seq[end:], inner.changed, inner.attempts)
 
 
 @dataclass(frozen=True)
@@ -216,16 +212,14 @@ def _draw_start(rng, lo: int, hi: int) -> int:
     `rng.randint(0, hi)` therefore meant a different range for different callers
     and, under numpy, could never draw the last legal start.
     """
-    if hasattr(rng, "integers"):            # numpy Generator
+    if hasattr(rng, "integers"):  # numpy Generator
         return int(rng.integers(lo, hi + 1))
-    if hasattr(rng, "random_sample"):       # numpy RandomState
+    if hasattr(rng, "random_sample"):  # numpy RandomState
         return int(rng.randint(lo, hi + 1))
-    return int(rng.randint(lo, hi))         # stdlib random.Random
+    return int(rng.randint(lo, hi))  # stdlib random.Random
 
 
-def sample_control_span(
-    length: int, total: int, spans, rng, attempts: int = 50
-) -> ControlSpan:
+def sample_control_span(length: int, total: int, spans, rng, attempts: int = 50) -> ControlSpan:
     """Place a length-matched control span avoiding every real span.
 
     The source returned a random start after 50 failures with no indication,
@@ -241,7 +235,7 @@ def sample_control_span(
             f"span running off the end, flagged as if it were valid."
         )
     spans = list(spans)
-    max_start = length - total          # INCLUSIVE: a span may sit flush at the end
+    max_start = length - total  # INCLUSIVE: a span may sit flush at the end
 
     def _clear(st: int) -> bool:
         return all(st + total <= s or st >= e for s, e in spans)
@@ -285,9 +279,7 @@ def grouped_delta_ci(
     ko = np.asarray(ko, dtype=float)
     groups = np.asarray(groups)
     if not (real.shape == ko.shape == groups.shape):
-        raise ValueError(
-            f"shapes differ: real={real.shape}, ko={ko.shape}, groups={groups.shape}"
-        )
+        raise ValueError(f"shapes differ: real={real.shape}, ko={ko.shape}, groups={groups.shape}")
     if real.size == 0:
         raise ValueError("no observations")
 

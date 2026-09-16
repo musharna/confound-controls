@@ -84,8 +84,7 @@ def test_the_delta_is_paired_not_two_independent_intervals():
     paired = paired_delta_auroc(y, weak, strong, n=800)
     assert independent_overlap, "fixture no longer exercises the distinction"
     assert paired.lo > 0, (
-        "the paired delta must resolve a difference the two independent "
-        "intervals cannot"
+        "the paired delta must resolve a difference the two independent intervals cannot"
     )
 
 
@@ -121,6 +120,4 @@ def test_incremental_validity_rejects_mismatched_row_counts():
     conf = rng.normal(0, 1, (50, 2))
     y = rng.integers(0, 2, 50)
     with pytest.raises(ValueError, match="train rows differ"):
-        incremental_validity(
-            conf, conf, rng.normal(0, 1, 49), rng.normal(0, 1, 50), y, y
-        )
+        incremental_validity(conf, conf, rng.normal(0, 1, 49), rng.normal(0, 1, 50), y, y)

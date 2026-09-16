@@ -60,12 +60,12 @@ those cases into `confound-driven` — reporting an absent measurement as a
 finding.
 
 `inverted` likewise had no counterpart: an interval entirely below chance
-*excludes* chance, so it fell through to `partial` — reporting a control that
+_excludes_ chance, so it fell through to `partial` — reporting a control that
 reliably reversed the ranking as a diminished-but-real signal.
 
 ## Two more controls
 
-**Incremental validity** — does the new feature add anything *beyond* the
+**Incremental validity** — does the new feature add anything _beyond_ the
 confounds? Fit confound-only and confound+feature models, evaluate both on the
 same held-out rows, and put a **paired** bootstrap interval on the AUROC
 difference.
@@ -87,7 +87,7 @@ manufactures the very lift the control is testing for.
 
 The source's verdict was two-valued (`"FM-adds-signal" if lo > 0 else
 "no-added-signal"`), so an interval straddling zero, an interval too wide to
-say anything, and an interval lying entirely *below* zero all reported the
+say anything, and an interval lying entirely _below_ zero all reported the
 same. The last of those is an augmented model that is reliably **worse** — a
 finding, not an absence of one.
 
@@ -169,7 +169,7 @@ row-level 0.071.
 
 **Three silent fallbacks, all pointing the same way.** Each returned a
 plausible value on failure, and each failure makes the ablation weaker or
-absent — which reads as the model *surviving* it:
+absent — which reads as the model _surviving_ it:
 
 - the dinucleotide shuffle ended `return seq` on failure, so an un-shuffleable
   span came back **unchanged** — a knockout that knocked nothing out. The
@@ -206,7 +206,13 @@ imports this package.
 ## Install
 
 ```bash
-pip install -e ".[test]"
+pip install confound-controls
+```
+
+From a checkout, for development:
+
+```bash
+pip install -e ".[dev]"
 pytest -q
 ```
 

@@ -58,9 +58,7 @@ def evaluate_confound(
     seed: int = 42,
 ) -> ConfoundResult:
     """Match negatives to positives on `columns`, then re-score on the subset."""
-    missing = [
-        c for c in list(columns) + [id_column, label_column] if c not in df.columns
-    ]
+    missing = [c for c in list(columns) + [id_column, label_column] if c not in df.columns]
     if missing:
         raise ValueError(
             f"{name}: columns not in frame: {missing}. Present: {list(df.columns)[:12]}"
@@ -70,8 +68,7 @@ def evaluate_confound(
     neg = df[df[label_column] == 0]
     if pos.empty or neg.empty:
         raise ValueError(
-            f"{name}: need both classes; got {len(pos)} positive and "
-            f"{len(neg)} negative rows"
+            f"{name}: need both classes; got {len(pos)} positive and {len(neg)} negative rows"
         )
 
     dupes = df[id_column][df[id_column].duplicated()].unique()

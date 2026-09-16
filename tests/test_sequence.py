@@ -50,9 +50,7 @@ def test_the_shuffle_is_deterministic_ACROSS_PROCESSES():
         ).stdout.strip()
         for _ in range(4)
     }
-    assert len(runs) == 1, (
-        f"same (seq, seed) gave {len(runs)} different shuffles: {runs}"
-    )
+    assert len(runs) == 1, f"same (seq, seed) gave {len(runs)} different shuffles: {runs}"
 
 
 def test_a_sequence_that_cannot_be_shuffled_reports_unchanged():
@@ -126,7 +124,7 @@ def _clustered(n_groups=12, per=8, effect=0.3, seed=0):
     rng = np.random.default_rng(seed)
     groups, real, ko = [], [], []
     for g in range(n_groups):
-        shift = rng.normal(0, 1.0)                  # whole-family offset
+        shift = rng.normal(0, 1.0)  # whole-family offset
         group_effect = effect + rng.normal(0, 0.25)  # effect varies BY family
         for _ in range(per):
             base = rng.normal(0, 0.2) + shift
@@ -219,9 +217,7 @@ def test_control_span_can_be_placed_flush_against_the_end():
     # length 10 with a 5-long control and (0,5) taken leaves exactly one legal
     # start: 5. numpy's randint excludes its upper bound, so the source could
     # only ever draw 0..4 and reported "cannot place" for a placeable span.
-    span = sample_control_span(
-        length=10, total=5, spans=[(0, 5)], rng=np.random.RandomState(0)
-    )
+    span = sample_control_span(length=10, total=5, spans=[(0, 5)], rng=np.random.RandomState(0))
     assert span.disjoint
     assert span.start == 5
     assert span.end == 10

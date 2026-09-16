@@ -71,8 +71,7 @@ def paired_delta_auroc(
     p_augmented = np.asarray(p_augmented)
     if not (len(y) == len(p_base) == len(p_augmented)):
         raise ValueError(
-            f"lengths differ: y={len(y)}, base={len(p_base)}, "
-            f"augmented={len(p_augmented)}"
+            f"lengths differ: y={len(y)}, base={len(p_base)}, augmented={len(p_augmented)}"
         )
     if len(np.unique(y)) < 2:
         raise ValueError("AUROC needs both classes present in y")
@@ -88,9 +87,7 @@ def paired_delta_auroc(
         if len(np.unique(y[b])) < 2:
             continue
         # Same rows for both models -- that is what makes it paired.
-        deltas.append(
-            roc_auc_score(y[b], p_augmented[b]) - roc_auc_score(y[b], p_base[b])
-        )
+        deltas.append(roc_auc_score(y[b], p_augmented[b]) - roc_auc_score(y[b], p_base[b]))
 
     if len(deltas) < n // 2:
         raise ValueError(
@@ -128,9 +125,7 @@ def paired_delta_auroc(
 
 def _fit_predict(X_train, y_train, X_test, seed: int = 42):
     scaler = StandardScaler().fit(X_train)
-    model = LogisticRegression(
-        class_weight="balanced", max_iter=2000, random_state=seed
-    )
+    model = LogisticRegression(class_weight="balanced", max_iter=2000, random_state=seed)
     model.fit(scaler.transform(X_train), y_train)
     return model.predict_proba(scaler.transform(X_test))[:, 1]
 
@@ -177,6 +172,4 @@ def incremental_validity(
         np.column_stack([X_test_confounds, feature_test]),
         seed,
     )
-    return paired_delta_auroc(
-        y_test, p_base, p_aug, n=n, seed=seed, max_ci_width=max_ci_width
-    )
+    return paired_delta_auroc(y_test, p_base, p_aug, n=n, seed=seed, max_ci_width=max_ci_width)
