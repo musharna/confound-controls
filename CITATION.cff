@@ -14,8 +14,8 @@ authors:
 repository-code: "https://github.com/musharna/confound-controls"
 url: "https://pypi.org/project/confound-controls/"
 license: GPL-3.0-or-later
-version: 0.3.1
-date-released: "2026-09-02"
+version: 0.3.2
+date-released: "2026-09-16"
 keywords:
   - confounding
   - matching

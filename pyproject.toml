@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "confound-controls"
-version = "0.3.1"
+version = "0.3.2"
 description = "Confound-matched controls for classifier claims: 1:1 matching, bootstrap AUROC, anchored verdicts, and a refusal when the control is vacuous."
 readme = "README.md"
 requires-python = ">=3.10"

@@ -4,6 +4,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions: SemV
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-09-16
+
+First PyPI release.
+
 ### Added
 
 - Packaging for PyPI: project URLs, classifiers, keywords; `CITATION.cff`.
