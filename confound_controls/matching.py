@@ -63,7 +63,7 @@ class MatchResult:
         """
         return self.n_matched < self.n_pool
 
-    def require_complete(self) -> "MatchResult":
+    def require_complete(self) -> MatchResult:
         if not self.complete:
             raise ValueError(
                 f"matched only {self.n_matched} of {self.n_positives} positives; "
@@ -73,7 +73,7 @@ class MatchResult:
             )
         return self
 
-    def require_selective(self) -> "MatchResult":
+    def require_selective(self) -> MatchResult:
         if not self.selective:
             raise ValueError(
                 f"matching consumed the entire negative pool "

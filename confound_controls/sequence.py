@@ -89,7 +89,7 @@ class ShuffleResult:
     changed: bool
     attempts: int
 
-    def require_changed(self) -> "ShuffleResult":
+    def require_changed(self) -> ShuffleResult:
         if not self.changed:
             raise ValueError(
                 f"dinucleotide shuffle returned the input unchanged after "
@@ -140,9 +140,9 @@ def dinucleotide_shuffle(seq: str, seed: int, attempts: int = 50) -> ShuffleResu
             edges[v].remove(w)
             rng.shuffle(edges[v])
             edges[v].append(w)  # the chosen last-edge departs last
-        for v in edges:
+        for v, succ_edges in edges.items():
             if v not in last_edges:
-                rng.shuffle(edges[v])
+                rng.shuffle(succ_edges)
 
         result = [seq[0]]
         cur = seq[0]
@@ -191,7 +191,7 @@ class ControlSpan:
     def end(self) -> int:
         return self.start + self.length
 
-    def require_disjoint(self) -> "ControlSpan":
+    def require_disjoint(self) -> ControlSpan:
         if not self.disjoint:
             raise ValueError(
                 f"could not place a length-{self.length} control span clear of "

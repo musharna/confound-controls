@@ -4,6 +4,32 @@ Extracted from the aim3 control battery shared byte-identically between
 two internal research projects.
 """
 
+from .ablation import (
+    INCONCLUSIVE as ABLATION_INCONCLUSIVE,
+)
+from .ablation import (
+    STRUCTURE_DEPENDENT,
+    STRUCTURE_INDEPENDENT,
+    AblationResult,
+    ablation_control,
+    assert_ablation_changed_input,
+)
+from .battery import (
+    ConfoundResult,
+    battery_passes,
+    evaluate_confound,
+    format_battery,
+    run_battery,
+)
+from .incremental import (
+    ADDS,
+    HARMS,
+    NO_EFFECT,
+    UNDERPOWERED,
+    DeltaResult,
+    incremental_validity,
+    paired_delta_auroc,
+)
 from .matching import MatchResult, match_negatives
 from .metrics import (
     DRIVEN,
@@ -15,23 +41,6 @@ from .metrics import (
     bootstrap_auroc,
     recovery,
     verdict,
-)
-from .incremental import (
-    ADDS,
-    HARMS,
-    NO_EFFECT,
-    UNDERPOWERED,
-    DeltaResult,
-    incremental_validity,
-    paired_delta_auroc,
-)
-from .ablation import (
-    STRUCTURE_DEPENDENT,
-    STRUCTURE_INDEPENDENT,
-    INCONCLUSIVE as ABLATION_INCONCLUSIVE,
-    AblationResult,
-    ablation_control,
-    assert_ablation_changed_input,
 )
 from .sequence import (
     CONFIRMED,
@@ -46,55 +55,48 @@ from .sequence import (
     knockout_span,
     sample_control_span,
 )
-from .battery import (
-    ConfoundResult,
-    battery_passes,
-    evaluate_confound,
-    format_battery,
-    run_battery,
-)
 
 __version__ = "0.3.1"
 
 __all__ = [
-    "MatchResult",
-    "match_negatives",
-    "AurocCI",
-    "bootstrap_auroc",
-    "recovery",
-    "verdict",
-    "ROBUST",
+    "ABLATION_INCONCLUSIVE",
+    "ADDS",
+    "CONFIRMED",
     "DRIVEN",
-    "PARTIAL",
+    "HARMS",
     "INCONCLUSIVE",
     "INVERTED",
-    "ConfoundResult",
-    "evaluate_confound",
-    "run_battery",
-    "battery_passes",
-    "format_battery",
-    "DeltaResult",
-    "paired_delta_auroc",
-    "incremental_validity",
-    "ADDS",
-    "HARMS",
+    "NOT_CONFIRMED",
     "NO_EFFECT",
-    "UNDERPOWERED",
-    "AblationResult",
-    "ablation_control",
-    "assert_ablation_changed_input",
+    "PARTIAL",
+    "ROBUST",
     "STRUCTURE_DEPENDENT",
     "STRUCTURE_INDEPENDENT",
-    "ABLATION_INCONCLUSIVE",
-    "ShuffleResult",
-    "dinucleotide_shuffle",
-    "dinucleotide_counts",
-    "knockout_span",
+    "UNDERPOWERED",
+    "AblationResult",
+    "AurocCI",
+    "ConfoundResult",
     "ControlSpan",
-    "sample_control_span",
+    "DeltaResult",
     "GroupedDelta",
-    "grouped_delta_ci",
+    "MatchResult",
+    "ShuffleResult",
+    "ablation_control",
+    "assert_ablation_changed_input",
+    "battery_passes",
+    "bootstrap_auroc",
     "confirm_knockout",
-    "CONFIRMED",
-    "NOT_CONFIRMED",
+    "dinucleotide_counts",
+    "dinucleotide_shuffle",
+    "evaluate_confound",
+    "format_battery",
+    "grouped_delta_ci",
+    "incremental_validity",
+    "knockout_span",
+    "match_negatives",
+    "paired_delta_auroc",
+    "recovery",
+    "run_battery",
+    "sample_control_span",
+    "verdict",
 ]

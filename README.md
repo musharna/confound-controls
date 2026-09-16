@@ -9,10 +9,11 @@ matching, it is not that confound. If it collapses to chance, it was.
 ```python
 from confound_controls import run_battery, format_battery, bootstrap_auroc
 
-anchor = bootstrap_auroc(df["label"], probs).point   # uncontrolled baseline
+anchor = bootstrap_auroc(df["label"], probs).point  # uncontrolled baseline
 
 results = run_battery(
-    df, prob_map,
+    df,
+    prob_map,
     spec={"gc": ["gc"], "expression": ["log_expr"], "joint": ["gc", "log_expr"]},
     anchor=anchor,
 )
@@ -77,8 +78,9 @@ two separately-reported AUROCs by eye is exactly the error this prevents.
 
 ```python
 from confound_controls import incremental_validity
+
 res = incremental_validity(conf_train, conf_test, feat_train, feat_test, y_train, y_test)
-res.verdict   # adds-signal | harms | no-added-signal | underpowered
+res.verdict  # adds-signal | harms | no-added-signal | underpowered
 ```
 
 `feat_train` must be out-of-fold. Fitting the feature on the rows the confound
@@ -96,9 +98,10 @@ score with the same model, and see what survives.
 
 ```python
 from confound_controls import assert_ablation_changed_input, ablation_control
-assert_ablation_changed_input(real_inputs, ablated_inputs)   # do this first
+
+assert_ablation_changed_input(real_inputs, ablated_inputs)  # do this first
 res = ablation_control(y, p_real, p_ablated)
-res.verdict   # structure-dependent | structure-independent | partial | inconclusive
+res.verdict  # structure-dependent | structure-independent | partial | inconclusive
 ```
 
 That first call is not optional politeness. **A broken ablation leaves the
@@ -150,15 +153,18 @@ than a length-matched control knockout elsewhere.
 
 ```python
 from confound_controls import (
-    knockout_span, sample_control_span, grouped_delta_ci, confirm_knockout,
+    knockout_span,
+    sample_control_span,
+    grouped_delta_ci,
+    confirm_knockout,
 )
 
 ko = knockout_span(seq, start, end, seed=1).require_changed()
 ctl = sample_control_span(len(seq), end - start, motif_spans, rng).require_disjoint()
 
-pooled  = grouped_delta_ci(real_scores, ko_scores, family_ids)
+pooled = grouped_delta_ci(real_scores, ko_scores, family_ids)
 control = grouped_delta_ci(real_scores, ctl_scores, family_ids)
-confirm_knockout(pooled, control)   # confirmed | not-confirmed
+confirm_knockout(pooled, control)  # confirmed | not-confirmed
 ```
 
 **`grouped_delta_ci` resamples whole groups, not rows.** Promoters from one

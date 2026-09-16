@@ -45,7 +45,7 @@ def _frame(n_pos=150, n_neg=600, seed=0, confound_drives=False, twin_frac=0.35):
     confound_drives=True  -> probability tracks GC only (confounded)
     """
     rng = np.random.default_rng(seed)
-    n_twin = int(round(n_neg * twin_frac))
+    n_twin = round(n_neg * twin_frac)
     gc = np.concatenate(
         [
             rng.normal(0.55, 0.05, n_pos),  # positives
