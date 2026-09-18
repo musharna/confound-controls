@@ -200,12 +200,12 @@ def match_negatives(
         raise ValueError(f"caliper must be positive, got {caliper!r}")
     if not len(neg_ids):
         return MatchResult([], list(range(len(pos_vecs))), len(pos_vecs), 0)
+    if not len(pos_vecs):
+        return MatchResult([], [], 0, len(neg_ids))
 
     order = range(len(pos_vecs))
     limit = caliper
     if method == "propensity":
-        if not len(pos_vecs):
-            return MatchResult([], [], 0, len(neg_ids))
         pos_logit, neg_logit = propensity_logit(pos_vecs, neg_vecs)
         pos_s, neg_s = pos_logit.reshape(-1, 1), neg_logit.reshape(-1, 1)
         order = np.argsort(-pos_logit, kind="stable")

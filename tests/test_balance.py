@@ -183,3 +183,17 @@ def test_incomplete_match_is_scored_as_the_one_to_one_design_it_claims():
     )  # fmt: skip
     assert (result.n_positives, result.n_matched_negatives) == (30, 30)
     assert len(result.unmatched_positions) == 10
+
+
+@pytest.mark.parametrize("method", ["nearest", "propensity"])
+def test_no_positives_means_no_caliper_was_applied(method):
+    # `caliper` reports the width APPLIED, in distance units. With nothing to
+    # match there is no propensity model to scale it by, so both methods say None
+    # rather than one echoing the argument and the other not.
+    neg = np.array([[0.0], [1.0], [2.0]])
+    empty = match_negatives(np.empty((0, 1)), list("abc"), neg, method=method, caliper=0.2)
+    assert (empty.matched_ids, empty.unmatched_positions, empty.n_pool) == ([], [], 3)
+    assert empty.caliper is None
+    # Control: with positives present the applied caliper is reported.
+    some = match_negatives(np.array([[0.1], [1.2]]), list("abc"), neg, method=method, caliper=0.2)
+    assert some.caliper is not None and some.caliper > 0
