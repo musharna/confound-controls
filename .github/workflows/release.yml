@@ -1,16 +1,16 @@
 name: Release
 
-# Tag-driven release: push a `vX.Y.Z` tag and this builds, publishes to PyPI
-# via Trusted Publishing (OIDC — no API token stored anywhere), and cuts a
-# GitHub release with the artifacts attached.
+# Tag-driven release: push a `vX.Y.Z` tag and this tests, builds, publishes to
+# PyPI with the account API token stored as the `PYPI_API_TOKEN` repo secret,
+# and cuts a GitHub release with the artifacts attached.
 #
-#   git tag v0.3.1 && git push origin v0.3.1
+#   git tag v0.3.3 && git push origin v0.3.3
 #
-# One-time setup required on PyPI: project `confound-controls` → Settings →
-# Publishing → add a GitHub Actions trusted publisher (owner=musharna,
-# repo=confound-controls, workflow=release.yml, environment=pypi). And create a
-# GitHub environment named `pypi` (Settings → Environments). For a project that
-# does not exist on PyPI yet, register it as a *pending* publisher first.
+# Trusted Publishing (OIDC) was the original design; it needs a one-time
+# web-only registration on PyPI that has not been done, so every tag failed at
+# the OIDC exchange with `invalid-publisher`. To switch back: register the
+# publisher on PyPI, drop the `password:` input below, and restore
+# `id-token: write`.
 
 on:
   push:
@@ -57,15 +57,16 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     environment: pypi
-    permissions:
-      id-token: write # OIDC token for Trusted Publishing; no password/token needed
     steps:
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: dist
           path: dist/
-      - name: Publish to PyPI (trusted publishing)
+      - name: Publish to PyPI (API token)
         uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          skip-existing: true # a rerun after a partial failure must not fail on the files already up
 
   github-release:
     name: Create GitHub release
