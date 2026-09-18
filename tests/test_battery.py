@@ -138,10 +138,17 @@ def test_incomplete_match_raises_by_default_and_is_reported_when_allowed():
     with pytest.raises(ValueError, match="matched only"):
         evaluate_confound(small, probs, ["other"], anchor)
     res = evaluate_confound(
-        small, probs, ["other"], anchor, require_complete_match=False, require_selective_match=False
+        small,
+        probs,
+        ["other"],
+        anchor,
+        require_complete_match=False,
+        require_selective_match=False,
+        max_smd=None,
     )
     assert not res.match_complete
-    assert res.n_matched_negatives == 5
+    # Only the matched positives are scored: the design reported is the 1:1 one.
+    assert (res.n_positives, res.n_matched_negatives) == (5, 5)
 
 
 def test_format_battery_flags_an_incomplete_match_in_its_text():
@@ -156,6 +163,7 @@ def test_format_battery_flags_an_incomplete_match_in_its_text():
             name="other",
             require_complete_match=False,
             require_selective_match=False,
+            max_smd=None,
         )
     }
     assert "INCOMPLETE MATCH" in format_battery(results, 0.9)
@@ -205,7 +213,13 @@ def test_an_equal_sized_pool_is_refused_as_a_vacuous_control():
 
     # Opting out reproduces the original silent behaviour, and it is WRONG in
     # exactly the way described: a pure-GC signal survives GC matching.
-    res = evaluate_confound(df, probs, ["gc"], anchor, name="gc", require_selective_match=False)
+    # Opting out of the selectivity check alone no longer gets there: a match that
+    # selected nothing balanced nothing, and the balance check says so.
+    with pytest.raises(ValueError, match="did not balance 'gc'"):
+        evaluate_confound(df, probs, ["gc"], anchor, name="gc", require_selective_match=False)
+    res = evaluate_confound(
+        df, probs, ["gc"], anchor, name="gc", require_selective_match=False, max_smd=None
+    )
     assert not res.match_selective
     assert res.verdict == ROBUST, (
         "if this is no longer ROBUST the vacuity demonstration has changed"

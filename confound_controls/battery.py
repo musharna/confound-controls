@@ -25,6 +25,7 @@ from dataclasses import dataclass, field
 import numpy as np
 import pandas as pd
 
+from .balance import BalanceReport, balance_report
 from .matching import match_negatives
 from .metrics import AurocCI, bootstrap_auroc, recovery, verdict
 
@@ -40,6 +41,8 @@ class ConfoundResult:
     match_complete: bool
     match_selective: bool
     unmatched_positions: list = field(default_factory=list)
+    # None only on results built by hand; `evaluate_confound` always fills it.
+    balance: BalanceReport | None = None
 
 
 def evaluate_confound(
@@ -52,12 +55,32 @@ def evaluate_confound(
     id_column: str = "id",
     label_column: str = "label",
     recovery_threshold: float = 0.70,
-    require_complete_match: bool = True,
+    method: str = "nearest",
+    caliper: float | None = None,
+    max_smd: float | None = 0.1,
+    smd_denominator: str = "pooled",
+    require_complete_match: bool | None = None,
     require_selective_match: bool = True,
     bootstrap_n: int = 2000,
     seed: int = 42,
 ) -> ConfoundResult:
-    """Match negatives to positives on `columns`, then re-score on the subset."""
+    """Match negatives to positives on `columns`, then re-score on the matched pairs.
+
+    `max_smd` is the balance the match must reach before its AUROC means
+    anything: above it the matched set is still confounded, and a classifier
+    that separates it has survived nothing. None reports the imbalance in
+    `.balance` instead of raising. A `caliper` is how balance is bought -- by
+    dropping the positives that have no close negative -- so with one set an
+    incomplete match is the design, not a failure: `require_complete_match`
+    defaults to True without a caliper and False with one.
+
+    Only matched positives are scored. 0.3.2 scored every positive against the
+    fewer matched negatives, which put the unmatched positives -- the ones in the
+    region the pool could not cover -- back into a comparison that claimed to be
+    1:1 matched.
+    """
+    if require_complete_match is None:
+        require_complete_match = caliper is None
     missing = [c for c in list(columns) + [id_column, label_column] if c not in df.columns]
     if missing:
         raise ValueError(
@@ -85,13 +108,34 @@ def evaluate_confound(
         pos[list(columns)].to_numpy(),
         neg[id_column].tolist(),
         neg[list(columns)].to_numpy(),
+        method=method,
+        caliper=caliper,
     )
     if require_complete_match:
         match.require_complete()
     if require_selective_match:
         match.require_selective()
+    if not match.matched_ids:
+        raise ValueError(
+            f"{name}: no positive found a negative"
+            + (f" within caliper {caliper}" if caliper is not None else "")
+            + "; there is nothing to evaluate"
+        )
 
-    eval_ids = set(pos[id_column].tolist()) | set(match.matched_ids)
+    matched_pos = pos.iloc[match.matched_positions]
+    matched_neg = neg.set_index(id_column, drop=False).loc[match.matched_ids]
+    balance = balance_report(
+        pos[list(columns)].to_numpy(),
+        neg[list(columns)].to_numpy(),
+        matched_pos[list(columns)].to_numpy(),
+        matched_neg[list(columns)].to_numpy(),
+        columns=list(columns),
+        denominator=smd_denominator,
+    )
+    if max_smd is not None:
+        balance.require_balanced(max_smd, name=name)
+
+    eval_ids = set(matched_pos[id_column].tolist()) | set(match.matched_ids)
     sub = df[df[id_column].isin(eval_ids)]
 
     unknown = [g for g in sub[id_column] if g not in prob_map]
@@ -115,6 +159,7 @@ def evaluate_confound(
         match_complete=match.complete,
         match_selective=match.selective,
         unmatched_positions=list(match.unmatched_positions),
+        balance=balance,
     )
 
 
@@ -153,9 +198,15 @@ def battery_passes(results: Mapping[str, ConfoundResult]) -> bool:
 def format_battery(results: Mapping[str, ConfoundResult], anchor: float) -> str:
     lines = [f"confound battery (anchor AUROC={anchor:.4f})", ""]
     for name, r in results.items():
-        flag = "" if r.match_complete else "  [INCOMPLETE MATCH]"
+        flag = (
+            ""
+            if r.match_complete
+            else f"  [INCOMPLETE MATCH: {len(r.unmatched_positions)} positives left out]"
+        )
         if not r.match_selective:
             flag += "  [VACUOUS CONTROL: whole pool used]"
+        if r.balance is not None and not r.balance.balanced():
+            flag += f"  [IMBALANCED: max |SMD| = {r.balance.max_abs_smd_after:.3f}]"
         lines.append(
             f"  {name:18s} AUROC={r.ci.point:.4f} "
             f"CI[{r.ci.lo:.4f},{r.ci.hi:.4f}] "
