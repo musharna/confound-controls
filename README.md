@@ -46,6 +46,49 @@ comparison equals the unmatched one and will report the confound as ruled out.
 Pass `require_selective_match=False` if you mean it; the result then carries
 `match_selective=False` and `format_battery` prints `[VACUOUS CONTROL]`.
 
+## The same failure, one size up
+
+A pool bigger than the positive set passes that check and can fail the same
+way. Greedy matching spends the negatives that sit near the positives first;
+the rest of the positives are paired with whatever is left. The match is
+complete and selective, and still confounded. Through 0.3.2 this library
+scored it anyway: 300 positives, 900 negatives, a score computed from nothing
+but GC, matched on GC — verdict `confound-robust`, AUROC 0.807, battery PASS.
+
+`evaluate_confound` now measures what the match achieved and refuses when it
+achieved too little:
+
+```
+ValueError: gc: matching did not balance 'gc': |SMD| = 0.987 after matching
+(was 2.010) exceeds 0.1. The matched set is still confounded, so a classifier
+that separates it has not been shown to be robust to this confound.
+```
+
+The standardized mean difference is the difference in group means in units of
+a standard deviation, measured against the unmatched groups' spread before and
+after. `max_smd=0.1` is the conventional line; `max_smd=None` reports instead of
+raising (`result.balance`, and `[IMBALANCED]` in `format_battery`).
+
+Balance is bought with a **caliper**: a positive with no negative within
+`caliper` standard deviations is left unmatched and reported, rather than paired
+with something that does not resemble it. Only matched positives are scored.
+The same data with `caliper=0.1`:
+
+```
+gc   AUROC=0.5015 CI[0.4350,0.5652] recovery=0.00 npos=148 -> confound-driven
+     SMD before 2.010   SMD after 0.005   var ratio 1.017
+```
+
+With many confounds every sample is far from every other, and nearest-neighbour
+matching stops finding anyone. `method="propensity"` matches on the logit of
+P(positive | confounds) instead, hardest positives first, with the caliper in
+standard deviations of that logit (0.2 is the usual width). On the `lalonde`
+data it fits the same logits as R's MatchIt (to 1e-7), picks the same 184 pairs
+up to exact ties, and reports the same post-match SMDs to six decimals;
+`tests/data/` holds MatchIt's output and `tests/test_balance.py` compares
+against it. `standardized_mean_differences`, `balance_report` and
+`propensity_logit` are usable on their own.
+
 ## Verdicts
 
 | verdict           | meaning                                                                             |

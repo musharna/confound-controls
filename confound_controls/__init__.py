@@ -14,6 +14,7 @@ from .ablation import (
     ablation_control,
     assert_ablation_changed_input,
 )
+from .balance import BalanceReport, balance_report, standardized_mean_differences
 from .battery import (
     ConfoundResult,
     battery_passes,
@@ -30,7 +31,7 @@ from .incremental import (
     incremental_validity,
     paired_delta_auroc,
 )
-from .matching import MatchResult, match_negatives
+from .matching import MatchResult, match_negatives, propensity_logit
 from .metrics import (
     DRIVEN,
     INCONCLUSIVE,
@@ -56,7 +57,7 @@ from .sequence import (
     sample_control_span,
 )
 
-__version__ = "0.3.2"
+__version__ = "0.4.0"
 
 __all__ = [
     "ABLATION_INCONCLUSIVE",
@@ -75,6 +76,7 @@ __all__ = [
     "UNDERPOWERED",
     "AblationResult",
     "AurocCI",
+    "BalanceReport",
     "ConfoundResult",
     "ControlSpan",
     "DeltaResult",
@@ -83,6 +85,7 @@ __all__ = [
     "ShuffleResult",
     "ablation_control",
     "assert_ablation_changed_input",
+    "balance_report",
     "battery_passes",
     "bootstrap_auroc",
     "confirm_knockout",
@@ -95,8 +98,10 @@ __all__ = [
     "knockout_span",
     "match_negatives",
     "paired_delta_auroc",
+    "propensity_logit",
     "recovery",
     "run_battery",
     "sample_control_span",
+    "standardized_mean_differences",
     "verdict",
 ]
