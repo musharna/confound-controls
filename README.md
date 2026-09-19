@@ -1,5 +1,10 @@
 # confound-controls
 
+[![PyPI](https://img.shields.io/pypi/v/confound-controls.svg)](https://pypi.org/project/confound-controls/)
+[![CI](https://github.com/musharna/confound-controls/actions/workflows/ci.yml/badge.svg)](https://github.com/musharna/confound-controls/actions/workflows/ci.yml)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
+
 Did your classifier learn the signal, or a confound?
 
 For each confound, restrict the negatives to a subset matched 1:1 to the
