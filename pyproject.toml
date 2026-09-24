@@ -40,3 +40,11 @@ packages = ["confound_controls"]
 
 [tool.ruff]
 line-length = 100
+
+[tool.mutmut]
+# Explicit, not guessed. mutmut guesses the package from the cwd basename:
+# the checkout's "confound-controls" -> confound_controls. A test that spawns a
+# child Python inside mutants/ re-loads mutmut's config there, the basename is
+# "mutants", the guess raises FileNotFoundError and the child exits 1
+# (test_the_shuffle_is_deterministic_ACROSS_PROCESSES, every night since 09-18).
+source_paths = ["confound_controls"]
